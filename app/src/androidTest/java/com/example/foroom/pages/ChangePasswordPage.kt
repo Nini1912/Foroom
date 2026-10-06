@@ -9,6 +9,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.alternator.foroom.R
 import com.example.design_system.R as DesignR
+import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 
@@ -26,16 +27,25 @@ class ChangePasswordPage {
 
     fun enterPassword(password: String) {
         onView(passwordEditText)
-            .perform(replaceText(password), closeSoftKeyboard())
+            .waitUntilVisible(10)
+            .perform(
+                replaceText(password),
+                closeSoftKeyboard()
+            )
     }
 
     fun repeatPassword(password: String) {
         onView(repeatPasswordEditText)
-            .perform(replaceText(password), closeSoftKeyboard())
+            .waitUntilVisible(10)
+            .perform(
+                replaceText(password),
+                closeSoftKeyboard()
+            )
     }
 
     fun confirmPasswordChange() {
         onView(withId(DesignR.id.actionButton))
+            .waitUntilVisible(10)
             .perform(click())
     }
 }

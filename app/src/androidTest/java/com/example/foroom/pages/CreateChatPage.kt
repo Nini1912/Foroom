@@ -1,23 +1,24 @@
 package com.example.foroom.pages
 
 import android.view.View
-import android.view.ViewGroup
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.PerformException
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.util.HumanReadables
 import com.alternator.foroom.R
 import com.example.design_system.R as DesignR
-import com.example.design_system.components.image_chooser.ImageChooserItemView
 import com.example.design_system.components.image_chooser.ImageChooserListView
 import com.example.foroom.Helper.waitUntilVisible
 import com.example.shared.model.Image
-import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
-import org.hamcrest.TypeSafeMatcher
 import java.util.concurrent.TimeoutException
 
 class CreateChatPage {
@@ -37,62 +38,111 @@ class CreateChatPage {
     }
 
     fun chooseChatImage(index: Int = 1) {
-        waitUntilEmojisLoaded()
-
-        onView(chatImageAt(index))
-            .perform(click())
+        onView(withId(R.id.chatImageChooser))
+            .waitUntilVisible(15)
+            .perform(waitForRealImages())
+            .perform(selectImageAt(index))
     }
 
     fun createChat() {
         onView(withId(R.id.createChatButton))
+            .waitUntilVisible(10)
             .perform(click())
     }
 
-    private fun waitUntilEmojisLoaded(timeoutMs: Long = 15_000) {
-        val deadline = System.currentTimeMillis() + timeoutMs
+    private fun waitForRealImages(
+        timeoutMs: Long = 30_000
+    ): ViewAction {
 
-        while (System.currentTimeMillis() < deadline) {
-            var loaded = false
+        return object : ViewAction {
 
-            onView(withId(R.id.chatImageChooser)).check { view, noViewFoundException ->
-                if (view == null) throw noViewFoundException
-                val images = (view as ImageChooserListView).images
-                loaded = images.isNotEmpty() && images.none { it.id == Image.BLANK_IMAGE_ID }
+            override fun getConstraints(): Matcher<View> {
+                return isAssignableFrom(ImageChooserListView::class.java)
             }
 
-            if (loaded) return
-            Thread.sleep(100)
-        }
+            override fun getDescription(): String {
+                return "wait until real chat emojis are loaded"
+            }
 
-        throw TimeoutException("Chat emojis were not loaded within $timeoutMs ms")
+            override fun perform(
+                uiController: UiController,
+                view: View
+            ) {
+                val chooser = view as ImageChooserListView
+                val endTime = System.currentTimeMillis() + timeoutMs
+
+                do {
+                    uiController.loopMainThreadUntilIdle()
+
+                    val images = chooser.images
+
+                    val loaded = images.isNotEmpty() &&
+                            images.any { image ->
+                                image.id != Image.BLANK_IMAGE_ID
+                            }
+
+                    if (loaded) {
+                        return
+                    }
+
+                    uiController.loopMainThreadForAtLeast(100)
+
+                } while (System.currentTimeMillis() < endTime)
+
+                throw PerformException.Builder()
+                    .withActionDescription(description)
+                    .withViewDescription(HumanReadables.describe(view))
+                    .withCause(
+                        TimeoutException(
+                            "Real chat emojis were not loaded within $timeoutMs ms"
+                        )
+                    )
+                    .build()
+            }
+        }
     }
 
-    // Matches the Nth ImageChooserItemView inside the chooser (counting row by row)
-    private fun chatImageAt(index: Int): Matcher<View> = object : TypeSafeMatcher<View>() {
+    private fun selectImageAt(index: Int): ViewAction {
 
-        override fun describeTo(description: Description) {
-            description.appendText("chat image item at position $index in chatImageChooser")
-        }
+        return object : ViewAction {
 
-        override fun matchesSafely(item: View): Boolean {
-            if (item !is ImageChooserItemView) return false
-
-            var parent = item.parent
-            while (parent != null && parent !is ImageChooserListView) {
-                parent = parent.parent
+            override fun getConstraints(): Matcher<View> {
+                return isAssignableFrom(ImageChooserListView::class.java)
             }
-            val chooser = parent as? ImageChooserListView ?: return false
 
-            val items = mutableListOf<View>()
-            for (r in 0 until chooser.childCount) {
-                val row = chooser.getChildAt(r) as? ViewGroup ?: continue
-                for (c in 0 until row.childCount) {
-                    val child = row.getChildAt(c)
-                    if (child is ImageChooserItemView) items.add(child)
+            override fun getDescription(): String {
+                return "select chat image at index $index"
+            }
+
+            override fun perform(
+                uiController: UiController,
+                view: View
+            ) {
+                val chooser = view as ImageChooserListView
+
+                if (chooser.images.isEmpty()) {
+                    throw AssertionError(
+                        "Chat image list is empty"
+                    )
                 }
-            }
 
-            return items.getOrNull(index) === item
+                if (index !in chooser.images.indices) {
+                    throw AssertionError(
+                        "Chat image index $index does not exist. " +
+                                "Available images: ${chooser.images.size}"
+                    )
+                }
+
+                if (chooser.images[index].id == Image.BLANK_IMAGE_ID) {
+                    throw AssertionError(
+                        "Chat image at index $index is still a loading placeholder"
+                    )
+                }
+
+                chooser.selectImageAt(index)
+
+                uiController.loopMainThreadUntilIdle()
+            }
         }
     }
 }

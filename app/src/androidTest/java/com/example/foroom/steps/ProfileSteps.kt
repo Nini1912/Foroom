@@ -2,10 +2,9 @@ package com.example.foroom.steps
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.alternator.foroom.R
+import com.example.foroom.Helper.waitUntilVisible
 import com.example.foroom.pages.ChangeLanguagePage
 import com.example.foroom.pages.ChangePasswordPage
 import com.example.foroom.pages.ProfilePage
@@ -18,15 +17,12 @@ class ProfileSteps {
 
     fun openProfile() {
         onView(withId(R.id.homeNavigationProfile))
+            .waitUntilVisible(10)
             .perform(click())
     }
 
     fun verifyProfileDisplayed() {
-        onView(withId(R.id.changePasswordItem))
-            .check(matches(isDisplayed()))
-
-        onView(withId(R.id.changeLanguageItem))
-            .check(matches(isDisplayed()))
+        profilePage.verifyProfileDisplayed()
     }
 
     fun openChangePassword() {

@@ -11,13 +11,29 @@ import com.example.foroom.Helper.waitUntilVisible
 
 class ProfilePage {
 
+    fun verifyProfileDisplayed() {
+        onView(withId(R.id.changePasswordItem))
+            .waitUntilVisible(10)
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.changeLanguageItem))
+            .waitUntilVisible(10)
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.signOutItem))
+            .waitUntilVisible(10)
+            .check(matches(isDisplayed()))
+    }
+
     fun openChangePassword() {
         onView(withId(R.id.changePasswordItem))
+            .waitUntilVisible(10)
             .perform(click())
     }
 
     fun openChangeLanguage() {
         onView(withId(R.id.changeLanguageItem))
+            .waitUntilVisible(10)
             .perform(click())
     }
 
@@ -35,6 +51,7 @@ class ProfilePage {
 
     fun signOut() {
         onView(withId(R.id.signOutItem))
+            .waitUntilVisible(10)
             .perform(click())
     }
 }
