@@ -44,14 +44,10 @@ class ProfileAndChatTests : KoinComponent {
 
     companion object {
         private const val USERNAME = "user"
-
-        // Make sure this is the password that currently works
-        // for your account on THIS emulator.
         private const val CURRENT_PASSWORD = "user123"
 
         private const val NEW_PASSWORD = "User1234!"
 
-        // Replace with your actual full name.
         private const val FULL_NAME = "Nino"
     }
 
@@ -83,8 +79,6 @@ class ProfileAndChatTests : KoinComponent {
 
         loginSteps.verifyHomeDisplayed()
 
-        // Restore original password so the test account
-        // can be reused by the other independent scenarios.
         profileSteps.openProfile()
         profileSteps.verifyProfileDisplayed()
 
@@ -110,19 +104,16 @@ class ProfileAndChatTests : KoinComponent {
         profileSteps.openProfile()
         profileSteps.verifyProfileDisplayed()
 
-        // Establish Georgian as the starting state.
         profileSteps.openChangeLanguage()
         profileSteps.selectGeorgian()
 
         profileSteps.verifyGeorgianLanguage()
 
-        // Georgian -> English
         profileSteps.openChangeLanguage()
         profileSteps.selectEnglish()
 
         profileSteps.verifyEnglishLanguage()
 
-        // English -> Georgian
         profileSteps.openChangeLanguage()
         profileSteps.selectGeorgian()
 
