@@ -4,6 +4,9 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.foroom.presentation.ui.activity.ForoomActivity
 import com.example.foroom.presentation.ui.util.datastore.user.ForoomUserDataStore
+import com.example.foroom.data.Constants
+import com.example.foroom.data.Constants.REGISTRATION_USERNAME_PREFIX
+import com.example.foroom.data.Constants.NONEXISTENT_USERNAME_PREFIX
 import com.example.foroom.steps.LoginSteps
 import com.example.foroom.steps.RegistrationSteps
 import kotlinx.coroutines.runBlocking
@@ -38,20 +41,13 @@ class LoginAndRegistrationTests : KoinComponent {
         .outerRule(clearUserDataRule)
         .around(activityRule)
 
-    companion object {
-        private const val EXISTING_USERNAME = "user"
-        private const val INVALID_PASSWORD = "WrongPassword123"
-        private const val VALID_REGISTRATION_PASSWORD = "Espresso123"
-    }
-
     @Test
     fun validUsernameAndInvalidPassword() {
         loginSteps.verifyLoginScreen()
 
-        loginSteps.login(
-            username = EXISTING_USERNAME,
-            password = INVALID_PASSWORD
-        )
+        loginSteps.enterUsername(Constants.EXISTING_USERNAME)
+        loginSteps.enterPassword(Constants.INVALID_PASSWORD)
+        loginSteps.clickLogin()
 
         loginSteps.verifyPasswordError()
     }
@@ -59,14 +55,13 @@ class LoginAndRegistrationTests : KoinComponent {
     @Test
     fun invalidUsernameAndInvalidPassword() {
         val invalidUsername =
-            "nonexistent_${System.currentTimeMillis()}"
+            "$NONEXISTENT_USERNAME_PREFIX${System.currentTimeMillis()}"
 
         loginSteps.verifyLoginScreen()
 
-        loginSteps.login(
-            username = invalidUsername,
-            password = INVALID_PASSWORD
-        )
+        loginSteps.enterUsername(invalidUsername)
+        loginSteps.enterPassword(Constants.INVALID_PASSWORD)
+        loginSteps.clickLogin()
 
         loginSteps.verifyUsernameError()
         loginSteps.verifyPasswordError()
@@ -75,17 +70,16 @@ class LoginAndRegistrationTests : KoinComponent {
     @Test
     fun successfulRegistration() {
         val uniqueUsername =
-            "espresso_${System.currentTimeMillis()}"
+            "$REGISTRATION_USERNAME_PREFIX${System.currentTimeMillis()}"
 
         loginSteps.verifyLoginScreen()
         loginSteps.navigateToRegistration()
 
         registrationSteps.verifyRegistrationScreen()
 
-        registrationSteps.fillRegistrationForm(
-            username = uniqueUsername,
-            password = VALID_REGISTRATION_PASSWORD
-        )
+        registrationSteps.enterUsername(uniqueUsername)
+        registrationSteps.enterPassword(Constants.REGISTRATION_PASSWORD)
+        registrationSteps.enterRepeatPassword(Constants.REGISTRATION_PASSWORD)
 
         registrationSteps.selectAvatar()
         registrationSteps.submitRegistration()

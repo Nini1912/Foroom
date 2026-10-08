@@ -1,34 +1,32 @@
 package com.example.foroom.steps
 
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import com.example.foroom.Helper.waitUntilVisible
+import com.example.foroom.data.Constants
 import com.example.foroom.pages.LoginPage
 
 class LoginSteps {
-
-    private val loginPage = LoginPage()
-
+    private val page = LoginPage()
     fun verifyLoginScreen() {
-        loginPage.verifyLoginScreenDisplayed()
+        onView(page.loginButton).check(matches(isDisplayed()))
+        onView(page.signUpButton).check(matches(isDisplayed()))
     }
-
-    fun login(username: String, password: String) {
-        loginPage.enterUsername(username)
-        loginPage.enterPassword(password)
-        loginPage.tapLogIn()
+    fun verifyLoginScreenDisplayed() = verifyLoginScreen()
+    fun enterUsername(username: String) {
+        onView(page.username).perform(replaceText(username), closeSoftKeyboard())
     }
-
+    fun enterPassword(password: String) {
+        onView(page.password).perform(replaceText(password), closeSoftKeyboard())
+    }
+    fun clickLogin() { onView(page.loginButton).perform(click()) }
     fun verifyPasswordError() {
-        loginPage.verifyPasswordErrorDisplayed()
+        onView(page.passwordError).waitUntilVisible(Constants.DEFAULT_WAIT_SECONDS.toLong()).check(matches(isDisplayed()))
     }
-
     fun verifyUsernameError() {
-        loginPage.verifyUsernameErrorDisplayed()
+        onView(page.usernameError).waitUntilVisible(Constants.DEFAULT_WAIT_SECONDS.toLong()).check(matches(isDisplayed()))
     }
-
-    fun navigateToRegistration() {
-        loginPage.tapSignUp()
-    }
-
-    fun verifyLoginScreenDisplayed() {
-        verifyLoginScreen()
-    }
+    fun navigateToRegistration() { onView(page.signUpButton).perform(click()) }
 }

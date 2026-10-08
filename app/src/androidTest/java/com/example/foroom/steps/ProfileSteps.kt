@@ -1,67 +1,44 @@
 package com.example.foroom.steps
 
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import com.alternator.foroom.R
+import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import com.example.foroom.Helper.waitUntilVisible
+import com.example.foroom.data.Constants
 import com.example.foroom.pages.ChangeLanguagePage
 import com.example.foroom.pages.ChangePasswordPage
 import com.example.foroom.pages.ProfilePage
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 
 class ProfileSteps {
-
-    private val profilePage = ProfilePage()
-    private val changePasswordPage = ChangePasswordPage()
-    private val changeLanguagePage = ChangeLanguagePage()
-
-    fun openProfile() {
-        onView(withId(R.id.homeNavigationProfile))
-            .waitUntilVisible(10)
-            .perform(click())
+    private val profile = ProfilePage()
+    private val password = ChangePasswordPage()
+    private val language = ChangeLanguagePage()
+    private fun assertVisible(matcher: org.hamcrest.Matcher<android.view.View>) {
+        onView(matcher).waitUntilVisible(Constants.DEFAULT_WAIT_SECONDS.toLong()).check(matches(isDisplayed()))
     }
-
+    private fun tap(matcher: org.hamcrest.Matcher<android.view.View>) {
+        onView(matcher).waitUntilVisible(Constants.DEFAULT_WAIT_SECONDS.toLong()).perform(click())
+    }
+    fun openProfile() = tap(profile.homeNavigation)
     fun verifyProfileDisplayed() {
-        profilePage.verifyProfileDisplayed()
+        assertVisible(profile.changePassword)
+        assertVisible(profile.changeLanguage)
+        assertVisible(profile.signOut)
     }
-
-    fun openChangePassword() {
-        profilePage.openChangePassword()
+    fun openChangePassword() = tap(profile.changePassword)
+    fun enterNewPassword(value: String) {
+        onView(password.password).waitUntilVisible(Constants.DEFAULT_WAIT_SECONDS.toLong()).perform(replaceText(value), closeSoftKeyboard())
     }
-
-    fun changePassword(newPassword: String) {
-        changePasswordPage.enterPassword(newPassword)
-        changePasswordPage.repeatPassword(newPassword)
-        changePasswordPage.confirmPasswordChange()
+    fun repeatNewPassword(value: String) {
+        onView(password.repeatPassword).waitUntilVisible(Constants.DEFAULT_WAIT_SECONDS.toLong()).perform(replaceText(value), closeSoftKeyboard())
     }
-
-    fun openChangeLanguage() {
-        profilePage.openChangeLanguage()
-    }
-
-    fun selectGeorgian() {
-        changeLanguagePage.selectGeorgian()
-    }
-
-    fun selectEnglish() {
-        changeLanguagePage.selectEnglish()
-    }
-
-    fun verifyGeorgianLanguage() {
-        profilePage.verifyGeorgianProfileLabel()
-    }
-
-    fun verifyEnglishLanguage() {
-        profilePage.verifyEnglishProfileLabel()
-    }
-
-    fun signOut() {
-        profilePage.signOut()
-    }
-
-    fun verifyHomeDisplayed() {
-        profilePage.verifyHomeDisplayed()
-    }
+    fun confirmPasswordChange() = tap(password.confirmButton)
+    fun openChangeLanguage() = tap(profile.changeLanguage)
+    fun selectGeorgian() = tap(language.georgian)
+    fun selectEnglish() = tap(language.english)
+    fun verifyGeorgianLanguage() = assertVisible(profile.georgianLabel)
+    fun verifyEnglishLanguage() = assertVisible(profile.englishLabel)
+    fun signOut() = tap(profile.signOut)
+    fun verifyHomeDisplayed() = assertVisible(profile.homeNavigation)
 }

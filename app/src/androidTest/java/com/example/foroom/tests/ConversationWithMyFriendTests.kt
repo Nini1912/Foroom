@@ -2,9 +2,14 @@ package com.example.foroom.tests
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.foroom.data.Constants
+import com.example.foroom.data.Constants.ACADEMY_QUESTION_PREFIX
+import com.example.foroom.data.Constants.DRINK_MESSAGE_PREFIX
+import com.example.foroom.data.Constants.GREETING_PREFIX
+import com.example.foroom.data.Constants.HISTORY_PREFIX
+import com.example.foroom.data.Constants.REPLY_PREFIX
 import com.example.foroom.presentation.ui.activity.ForoomActivity
 import com.example.foroom.presentation.ui.util.datastore.user.ForoomUserDataStore
-import com.example.foroom.Helper.waitUntilVisible
 import com.example.foroom.steps.ConversationSteps
 import com.example.foroom.steps.LoginSteps
 import com.example.foroom.steps.ProfileSteps
@@ -30,21 +35,12 @@ class ConversationWithMyFriendTests : KoinComponent {
     private val activity = ActivityScenarioRule(ForoomActivity::class.java)
     @get:Rule val rules: RuleChain = RuleChain.outerRule(resetSession).around(activity)
 
-    companion object {
-        private const val USER_A = "user1"
-        private const val USER_B = "user2"
-        private const val PASSWORD = "user123"
-        private const val JOHN_WEEK = "johnWeek"
-        private const val PERSONAL_CHAT = "Nino Beridze"
-        private const val SHARED_CHAT = "something"
-    }
-
     private fun signIn(user: String) {
         login.verifyLoginScreen()
-        login.login(user, PASSWORD)
-        androidx.test.espresso.Espresso.onView(
-            androidx.test.espresso.matcher.ViewMatchers.withId(com.alternator.foroom.R.id.homeNavigationProfile)
-        ).let { it.waitUntilVisible(15) }
+        login.enterUsername(user)
+        login.enterPassword(Constants.PASSWORD)
+        login.clickLogin()
+        profile.verifyHomeDisplayed()
     }
 
     private fun signOut() {
@@ -54,42 +50,75 @@ class ConversationWithMyFriendTests : KoinComponent {
     }
 
     @Test fun sendMessageInJohnWeekAndVerifyPersistence() {
-        val message = "let's go for a drink ${System.currentTimeMillis()}"
-        signIn(USER_A)
-        conversation.openChat(JOHN_WEEK)
-        conversation.sendAndVerify(message)
+        val message = "$DRINK_MESSAGE_PREFIX${System.currentTimeMillis()}"
+        signIn(Constants.USER_A)
+        conversation.searchChat(Constants.JOHN_WEEK_CHAT)
+        conversation.openChat(Constants.JOHN_WEEK_CHAT)
+        conversation.verifyChatTitle(Constants.JOHN_WEEK_CHAT)
+        conversation.enterMessage(message)
+        conversation.tapSend()
+        conversation.verifyMessage(message)
         conversation.closeChat()
-        conversation.openChat(JOHN_WEEK)
+        conversation.searchChat(Constants.JOHN_WEEK_CHAT)
+        conversation.openChat(Constants.JOHN_WEEK_CHAT)
+        conversation.verifyChatTitle(Constants.JOHN_WEEK_CHAT)
         conversation.verifyMessage(message)
     }
 
     @Test fun sendAutomationAcademyQuestionInPersonalChat() {
-        val question = "Which module do you like most in the Automation Academy? ${System.currentTimeMillis()}"
-        signIn(USER_A)
-        conversation.openChat(PERSONAL_CHAT)
-        conversation.sendAndVerify(question)
+        val question = "$ACADEMY_QUESTION_PREFIX${System.currentTimeMillis()}"
+        signIn(Constants.USER_A)
+        conversation.searchChat(Constants.PERSONAL_CHAT)
+        conversation.openChat(Constants.PERSONAL_CHAT)
+        conversation.verifyChatTitle(Constants.PERSONAL_CHAT)
+        conversation.enterMessage(question)
+        conversation.tapSend()
+        conversation.verifyMessage(question)
     }
 
     @Test fun continueConversationUsingAnotherAccount() {
         val suffix = System.currentTimeMillis().toString()
-        val greeting = "Hello from User A $suffix"
-        val reply = "Hello from User B $suffix"
-        signIn(USER_A)
-        conversation.openChat(SHARED_CHAT)
-        conversation.sendAndVerify(greeting)
-        repeat(26) { conversation.sendAndVerify("History $suffix #$it") }
+        val greeting = "$GREETING_PREFIX$suffix"
+        val reply = "$REPLY_PREFIX$suffix"
+        signIn(Constants.USER_A)
+        conversation.searchChat(Constants.SHARED_CHAT)
+        conversation.openChat(Constants.SHARED_CHAT)
+        conversation.verifyChatTitle(Constants.SHARED_CHAT)
+        conversation.enterMessage(greeting)
+        conversation.tapSend()
+        conversation.verifyMessage(greeting)
+        repeat(Constants.HISTORY_MESSAGE_COUNT) {
+            val history = "$HISTORY_PREFIX$suffix #$it"
+            conversation.enterMessage(history)
+            conversation.tapSend()
+            conversation.verifyMessage(history)
+        }
         conversation.closeChat()
         signOut()
 
-        signIn(USER_B)
-        conversation.openChat(SHARED_CHAT)
-        conversation.findOlderMessage(greeting, USER_A)
-        conversation.sendAndVerify(reply)
+        signIn(Constants.USER_B)
+        conversation.searchChat(Constants.SHARED_CHAT)
+        conversation.openChat(Constants.SHARED_CHAT)
+        conversation.verifyChatTitle(Constants.SHARED_CHAT)
+        conversation.findOlderMessage(greeting, Constants.USER_A)
+        conversation.enterMessage(reply)
+        conversation.tapSend()
+        conversation.verifyMessage(reply)
+        conversation.findOlderMessage(
+            greeting,
+            Constants.USER_A
+        )
+        conversation.verifyMessage(
+            reply,
+            Constants.USER_B
+        )
         conversation.closeChat()
         signOut()
 
-        signIn(USER_A)
-        conversation.openChat(SHARED_CHAT)
-        conversation.verifyMessage(reply, USER_B)
+        signIn(Constants.USER_A)
+        conversation.searchChat(Constants.SHARED_CHAT)
+        conversation.openChat(Constants.SHARED_CHAT)
+        conversation.verifyChatTitle(Constants.SHARED_CHAT)
+        conversation.verifyMessage(reply, Constants.USER_B)
     }
 }

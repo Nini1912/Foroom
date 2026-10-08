@@ -4,6 +4,8 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.foroom.presentation.ui.activity.ForoomActivity
 import com.example.foroom.presentation.ui.util.datastore.user.ForoomUserDataStore
+import com.example.foroom.data.Constants
+import com.example.foroom.data.Constants.CHAT_NAME_PREFIX
 import com.example.foroom.steps.ChatSteps
 import com.example.foroom.steps.LoginSteps
 import com.example.foroom.steps.ProfileSteps
@@ -42,22 +44,12 @@ class ProfileAndChatTests : KoinComponent {
         .outerRule(clearUserDataRule)
         .around(activityRule)
 
-    companion object {
-        private const val USERNAME = "user"
-        private const val CURRENT_PASSWORD = "user123"
-
-        private const val NEW_PASSWORD = "User1234!"
-
-        private const val FULL_NAME = "Nino"
-    }
-
     @Test
     fun changePasswordAndVerifyLogin() {
 
-        loginSteps.login(
-            USERNAME,
-            CURRENT_PASSWORD
-        )
+        loginSteps.enterUsername(Constants.EXISTING_USERNAME)
+        loginSteps.enterPassword(Constants.PASSWORD)
+        loginSteps.clickLogin()
 
         profileSteps.verifyHomeDisplayed()
 
@@ -66,16 +58,15 @@ class ProfileAndChatTests : KoinComponent {
 
         profileSteps.openChangePassword()
 
-        profileSteps.changePassword(
-            NEW_PASSWORD
-        )
+        profileSteps.enterNewPassword(Constants.NEW_PASSWORD)
+        profileSteps.repeatNewPassword(Constants.NEW_PASSWORD)
+        profileSteps.confirmPasswordChange()
 
         loginSteps.verifyLoginScreenDisplayed()
 
-        loginSteps.login(
-            USERNAME,
-            NEW_PASSWORD
-        )
+        loginSteps.enterUsername(Constants.EXISTING_USERNAME)
+        loginSteps.enterPassword(Constants.NEW_PASSWORD)
+        loginSteps.clickLogin()
 
         profileSteps.verifyHomeDisplayed()
 
@@ -84,9 +75,9 @@ class ProfileAndChatTests : KoinComponent {
 
         profileSteps.openChangePassword()
 
-        profileSteps.changePassword(
-            CURRENT_PASSWORD
-        )
+        profileSteps.enterNewPassword(Constants.PASSWORD)
+        profileSteps.repeatNewPassword(Constants.PASSWORD)
+        profileSteps.confirmPasswordChange()
 
         loginSteps.verifyLoginScreenDisplayed()
     }
@@ -94,10 +85,9 @@ class ProfileAndChatTests : KoinComponent {
     @Test
     fun changeLanguageGeorgianToEnglishAndBack() {
 
-        loginSteps.login(
-            USERNAME,
-            CURRENT_PASSWORD
-        )
+        loginSteps.enterUsername(Constants.EXISTING_USERNAME)
+        loginSteps.enterPassword(Constants.PASSWORD)
+        loginSteps.clickLogin()
 
         profileSteps.verifyHomeDisplayed()
 
@@ -124,12 +114,11 @@ class ProfileAndChatTests : KoinComponent {
     fun createChatAndFindItInChatList() {
 
         val chatName =
-            "$FULL_NAME ${System.currentTimeMillis()}"
+            "${CHAT_NAME_PREFIX} ${System.currentTimeMillis()}"
 
-        loginSteps.login(
-            USERNAME,
-            CURRENT_PASSWORD
-        )
+        loginSteps.enterUsername(Constants.EXISTING_USERNAME)
+        loginSteps.enterPassword(Constants.PASSWORD)
+        loginSteps.clickLogin()
 
         profileSteps.verifyHomeDisplayed()
 
