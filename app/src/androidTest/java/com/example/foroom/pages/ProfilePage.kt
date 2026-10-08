@@ -25,6 +25,11 @@ class ProfilePage {
             .check(matches(isDisplayed()))
     }
 
+    fun verifyHomeDisplayed() {
+        onView(withId(R.id.homeNavigationProfile))
+            .check(matches(isDisplayed()))
+    }
+
     fun openChangePassword() {
         onView(withId(R.id.changePasswordItem))
             .waitUntilVisible(10)

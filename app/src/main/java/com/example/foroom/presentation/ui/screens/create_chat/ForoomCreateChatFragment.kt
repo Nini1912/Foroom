@@ -17,6 +17,7 @@ import com.example.shared.extension.onClick
 import com.example.shared.model.Image
 import com.example.shared.ui.fragment.BaseFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import android.util.Log
 
 class ForoomCreateChatFragment :
     BaseFragment<ForoomCreateChatViewModel, FragmentForoomCreateChatBinding>() {
@@ -39,11 +40,17 @@ class ForoomCreateChatFragment :
     private fun setObservers() {
         viewModel.emojisLiveData.handleResult(viewLifecycleOwner) {
             onSuccess { images ->
+                Log.d("CHAT_DEBUG", "Emojis loaded: ${images.size}")
                 binding.chatImageChooser.images = images
             }
 
+            onError {
+                Log.e("CHAT_DEBUG", "Failed to load chat emojis")
+            }
+
             onLoading {
-                binding.chatImageChooser.images = Image.getBlankImages(BLANK_IMAGE_COUNT)
+                binding.chatImageChooser.images =
+                    Image.getBlankImages(BLANK_IMAGE_COUNT)
             }
         }
 

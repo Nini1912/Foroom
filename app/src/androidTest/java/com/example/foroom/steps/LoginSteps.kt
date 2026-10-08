@@ -27,4 +27,8 @@ class LoginSteps {
     fun navigateToRegistration() {
         loginPage.tapSignUp()
     }
+
+    fun verifyLoginScreenDisplayed() {
+        verifyLoginScreen()
+    }
 }

@@ -8,6 +8,8 @@ import com.example.foroom.Helper.waitUntilVisible
 import com.example.foroom.pages.ChangeLanguagePage
 import com.example.foroom.pages.ChangePasswordPage
 import com.example.foroom.pages.ProfilePage
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 
 class ProfileSteps {
 
@@ -57,5 +59,9 @@ class ProfileSteps {
 
     fun signOut() {
         profilePage.signOut()
+    }
+
+    fun verifyHomeDisplayed() {
+        profilePage.verifyHomeDisplayed()
     }
 }

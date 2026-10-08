@@ -59,7 +59,7 @@ class ProfileAndChatTests : KoinComponent {
             CURRENT_PASSWORD
         )
 
-        loginSteps.verifyHomeDisplayed()
+        profileSteps.verifyHomeDisplayed()
 
         profileSteps.openProfile()
         profileSteps.verifyProfileDisplayed()
@@ -77,7 +77,7 @@ class ProfileAndChatTests : KoinComponent {
             NEW_PASSWORD
         )
 
-        loginSteps.verifyHomeDisplayed()
+        profileSteps.verifyHomeDisplayed()
 
         profileSteps.openProfile()
         profileSteps.verifyProfileDisplayed()
@@ -99,7 +99,7 @@ class ProfileAndChatTests : KoinComponent {
             CURRENT_PASSWORD
         )
 
-        loginSteps.verifyHomeDisplayed()
+        profileSteps.verifyHomeDisplayed()
 
         profileSteps.openProfile()
         profileSteps.verifyProfileDisplayed()
@@ -131,7 +131,7 @@ class ProfileAndChatTests : KoinComponent {
             CURRENT_PASSWORD
         )
 
-        loginSteps.verifyHomeDisplayed()
+        profileSteps.verifyHomeDisplayed()
 
         chatSteps.openCreateChat()
 

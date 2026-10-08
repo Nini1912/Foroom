@@ -14,6 +14,7 @@ import com.example.foroom.data.model.request.RegistrationRequestEntity
 import com.example.foroom.data.model.response.ChatsResponseEntity
 import com.example.foroom.data.model.response.MessageHistoryResponseEntity
 import com.example.network.model.response.UserTokenResponse
+import android.util.Log
 
 class ForoomRestDataSourceImpl(
     private val imagesApi: ImagesApi,
@@ -29,7 +30,30 @@ class ForoomRestDataSourceImpl(
     }
 
     override suspend fun getEmojis(): List<Image> {
-        return imagesApi.getEmojis()
+        return try {
+            Log.d("EMOJI_API", "Requesting emojis")
+
+            val emojis = imagesApi.getEmojis()
+
+            Log.d("EMOJI_API", "Success: ${emojis.size} emojis")
+            emojis
+
+        } catch (e: retrofit2.HttpException) {
+            Log.e(
+                "EMOJI_API",
+                "HTTP error: ${e.code()} - ${e.message()}",
+                e
+            )
+            throw e
+
+        } catch (e: Exception) {
+            Log.e(
+                "EMOJI_API",
+                "Request failed: ${e.javaClass.simpleName}: ${e.message}",
+                e
+            )
+            throw e
+        }
     }
 
     override suspend fun registerUser(request: RegistrationRequestEntity): UserTokenResponse {
